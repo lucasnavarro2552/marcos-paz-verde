@@ -114,17 +114,14 @@ async function loadCensusData() {
 // 4. MAPA INTERACTIVO Y ANIMACIÓN DE "PLANTADO" DE MARCADORES
 // ============================================================================
 function initMap() {
-  // Coordenadas centrales de Marcos Paz, Buenos Aires
-  map = L.map('map').setView([-34.7665, -58.8332], 15);
+    // Coordenadas centrales de Marcos Paz, Buenos Aires
+    map = L.map('map').setView([-34.7665, -58.8332], 15);
 
-  // Capa de mapa limpia y detallada (Carto Voyager)
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    // Capa base gratuita de OpenStreetMap (sin API Key)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
     maxZoom: 19
-  }).addTo(map);
-
-  markersLayer = L.layerGroup().addTo(map);
-}
+}).addTo(map);
 
 /**
  * Renderiza los marcadores uno por uno con retraso escalonado para simular
