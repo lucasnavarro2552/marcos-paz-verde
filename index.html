@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marcos Paz Urban Tree Census | The City of Trees</title>
+  
+  <!-- Tipografías modernas y legibles para proyector -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS (Mapa interactivo sin restricciones de API Key) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Contenedor sutil para animación ambiental de hojas cayendo -->
+  <div id="leaves-container" aria-hidden="true"></div>
+
+  <!-- Barra de navegación superior -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="tree-pulse">🌳</span>
+      <span>Marcos Paz Census</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#map-section">Interactive Map</a></li>
+      <li><a href="#ranking-section">Top 10 Ranking</a></li>
+      <li><a href="#species-section">Species Guide</a></li>
+      <li><a href="#green-spots-section">Green Spots</a></li>
+      <li><a href="#allergies-section">Allergies</a></li>
+      <li><a href="#felling-section">Felling Schedule</a></li>
+    </ul>
+    <div id="db-status" class="db-badge" title="Database connection status">Connecting...</div>
+  </nav>
+
+  <!-- Encabezado principal (Hero) -->
+  <header class="hero">
+    <div class="hero-content">
+      <span class="badge-pill">Environmental & Urban Forestry Project</span>
+      <h1>Marcos Paz, <span class="highlight">The City of Trees</span></h1>
+      <p class="subtitle">
+        Interactive Municipal Tree Census — Explore native and urban species, biodiversity hotspots, 
+        allergy prevention, and scheduled maintenance across Buenos Aires Province.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <strong id="total-trees-stat">6,365</strong>
+          <span>Cataloged Trees</span>
+        </div>
+        <div class="stat-box">
+          <strong>10</strong>
+          <span>Dominant Species</span>
+        </div>
+        <div class="stat-box">
+          <strong>4</strong>
+          <span>Key Green Spots</span>
+        </div>
+      </div>
+      <a href="#map-section" class="btn-primary">Explore the Map</a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- SECCIÓN 1: MAPA INTERACTIVO -->
+    <section id="map-section" class="section reveal">
+      <div class="section-header">
+        <h2>Interactive Tree & Green Spot Map</h2>
+        <p>Click on any animated tree marker to inspect botanical details, care tips, and health status.</p>
+      </div>
+
+      <!-- Filtros rápidos del mapa -->
+      <div class="map-controls">
+        <button class="filter-btn active" data-filter="all">All Markers</button>
+        <button class="filter-btn" data-filter="healthy">Healthy Trees</button>
+        <button class="filter-btn" data-filter="felling">Scheduled Felling</button>
+        <button class="filter-btn" data-filter="allergenic">Allergenic Species</button>
+        <button class="filter-btn" data-filter="greenspots">Green Spots</button>
+      </div>
+
+      <div class="map-layout">
+        <!-- Contenedor del mapa -->
+        <div id="map"></div>
+
+        <!-- Panel lateral de detalle al hacer clic en un árbol -->
+        <aside id="tree-detail-panel" class="detail-card">
+          <div class="empty-state">
+            <div class="icon-grow">🌱</div>
+            <h3>Select a Tree on the Map</h3>
+            <p>Click any marker in Marcos Paz to view its scientific classification, environmental benefits, allergy risk, and local history.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: TOP 10 RANKING DE ESPECIES -->
+    <section id="ranking-section" class="section reveal">
+      <div class="section-header">
+        <h2>Top 10 Most Abundant Tree Species</h2>
+        <p>Distribution of the dominant arboreal population across Marcos Paz streets and parks.</p>
+      </div>
+      <div id="ranking-container" class="ranking-card">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: GUÍA DE ESPECIES -->
+    <section id="species-section" class="section reveal">
+      <div class="section-header">
+        <h2>Urban & Native Species Catalog</h2>
+        <p>Learn how to care for our urban forest, its ecological benefits, and historical roots.</p>
+      </div>
+      <div id="species-grid" class="cards-grid">
+        <!-- Tarjetas generadas dinámicamente por JS -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: PUNTOS VERDES -->
+    <section id="green-spots-section" class="section reveal">
+      <div class="section-header">
+        <h2>Marcos Paz Green Spots</h2>
+        <p>Squares, botanical gardens, and nurseries preserving local biodiversity.</p>
+      </div>
+      <div id="green-spots-grid" class="spots-grid">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: ALERGIAS Y PREVENCIÓN -->
+    <section id="allergies-section" class="section reveal">
+      <div class="section-header">
+        <h2>Seasonal Allergies & Prevention Guide</h2>
+        <p>Identify allergenic trees during spring pollination and learn how to minimize symptoms.</p>
+      </div>
+      
+      <div class="allergy-layout">
+        <div class="allergy-species-box">
+          <h3>⚠️ Main Allergenic Species in Marcos Paz</h3>
+          <div id="allergenic-list" class="allergenic-items">
+            <!-- Generado dinámicamente por JS -->
+          </div>
+        </div>
+
+        <div class="allergy-tips-box">
+          <h3>🛡️ Prevention Tips & Over-the-Counter (OTC) Relief</h3>
+          <ul class="tips-list">
+            <li><strong>Peak Hours:</strong> Keep windows closed between 5:00 AM and 10:00 AM when pollen and London Plane trichomes peak.</li>
+            <li><strong>Protective Gear:</strong> Wear wraparound sunglasses and a mask when walking under plane trees in September–October.</li>
+            <li><strong>Hygiene:</strong> Shower and change clothes after spending time outdoors to remove trapped pollen.</li>
+            <li><strong>Common OTC Options:</strong> Second-generation oral antihistamines (<em>Loratadine, Cetirizine, Fexofenadine</em>), saline nasal sprays, and lubricating eye drops.</li>
+          </ul>
+          <p class="medical-disclaimer">
+            *Disclaimer: Informational guide only. Consult a pharmacist or healthcare professional before taking any medication.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: CRONOGRAMA DE TALAS Y PODAS -->
+    <section id="felling-section" class="section reveal">
+      <div class="section-header">
+        <h2>Scheduled Felling & Risk Management</h2>
+        <p>Transparent municipal calendar for hazardous tree removal and subsequent native replanting.</p>
+      </div>
+      <div class="table-wrapper">
+        <table class="felling-table">
+          <thead>
+            <tr>
+              <th>Scheduled Date</th>
+              <th>Species</th>
+              <th>Scientific Name</th>
+              <th>Coordinates</th>
+              <th>Status & Action</th>
+            </tr>
+          </thead>
+          <tbody id="felling-tbody">
+            <!-- Generado dinámicamente por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div>
+        <h3>🌿 Marcos Paz Urban Tree Census</h3>
+        <p>Technical English University Project — November 16, 2026</p>
+      </div>
+      <div class="team-box">
+        <h4>Project Team Members</h4>
+        <p>Student 1 • Student 2 • Student 3 • Student 4</p>
+        <span class="course-tag">Subject: Technical English (Inglés Técnico)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS (Mapas) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Supabase JS Client (Base de datos) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lógica principal -->
+  <script src="app.js"></script>
+</body>
+</html>

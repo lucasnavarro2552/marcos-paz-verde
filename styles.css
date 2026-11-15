@@ -1,0 +1,640 @@
+/* ==========================================================================
+   VARIABLES DE COLOR Y TIPOGRAFÍA (Paleta Forestal de Alto Contraste)
+   ========================================================================== */
+:root {
+  --bg-main: #f4f8f5;
+  --bg-card: #ffffff;
+  --green-dark: #143625;
+  --green-primary: #1f5c3d;
+  --green-medium: #2e8555;
+  --green-light: #e3f1e8;
+  --accent-gold: #d99b26;
+  --danger-red: #c93b3b;
+  --warning-amber: #d97706;
+  --text-dark: #16241c;
+  --text-muted: #4b6356;
+  --border-color: #d3e4d9;
+  --shadow-sm: 0 4px 12px rgba(20, 54, 37, 0.06);
+  --shadow-md: 0 10px 28px rgba(20, 54, 37, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--green-dark);
+}
+
+/* ==========================================================================
+   ANIMACIÓN AMBIENTAL DE HOJAS CAYENDO (Sutil, no invasiva)
+   ========================================================================== */
+#leaves-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.falling-leaf {
+  position: absolute;
+  top: -40px;
+  font-size: 1.2rem;
+  opacity: 0.35;
+  animation: fallAndSway linear infinite;
+}
+
+@keyframes fallAndSway {
+  0% {
+    transform: translateY(-40px) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(50vh) translateX(35px) rotate(180deg);
+  }
+  85% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(105vh) translateX(-25px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================================
+   BARRA DE NAVEGACIÓN
+   ========================================================================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 5%;
+  background: rgba(20, 54, 37, 0.96);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.tree-pulse {
+  display: inline-block;
+  animation: gentleGrow 3s ease-in-out infinite;
+}
+
+@keyframes gentleGrow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.4rem;
+}
+
+.nav-links a {
+  color: #e3f1e8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: #8ce0b0;
+}
+
+.db-badge {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   HERO / ENCABEZADO
+   ========================================================================== */
+.hero {
+  background: linear-gradient(135deg, #102c1e 0%, #1f5c3d 60%, #2e8555 100%);
+  color: #fff;
+  padding: 4.5rem 5% 4rem;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.badge-pill {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #a7f3d0;
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.hero h1 {
+  color: #ffffff;
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.15;
+}
+
+.hero h1 .highlight {
+  color: #8ce0b0;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: #dcf2e5;
+  max-width: 720px;
+  margin: 0 auto 2.2rem;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.2rem;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 1.8rem;
+  border-radius: 14px;
+  min-width: 160px;
+}
+
+.stat-box strong {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.8rem;
+  color: #8ce0b0;
+}
+
+.stat-box span {
+  font-size: 0.9rem;
+  color: #e3f1e8;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #8ce0b0;
+  color: var(--green-dark);
+  font-weight: 700;
+  padding: 0.9rem 2rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 1.05rem;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #a7f3d0;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   SECCIONES Y ANIMACIÓN SCROLL REVEAL
+   ========================================================================== */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 5% 4rem;
+}
+
+.section {
+  margin-top: 4.5rem;
+}
+
+.section-header {
+  margin-bottom: 1.8rem;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.section-header p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+/* Efecto de aparición suave al hacer scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   MAPA INTERACTIVO Y MARCADORES ANIMADOS ("PLANTADO")
+   ========================================================================== */
+.map-controls {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+
+.filter-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-dark);
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--green-primary);
+  color: #fff;
+  border-color: var(--green-primary);
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+#map {
+  height: 520px;
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  z-index: 1;
+}
+
+/* Animación de "plantado" para los marcadores del mapa */
+.tree-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+  transform-origin: bottom center;
+  animation: plantTree 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes plantTree {
+  0% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.2);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(3px) scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.detail-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.8rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.icon-grow {
+  font-size: 3rem;
+  margin-bottom: 0.8rem;
+  animation: gentleGrow 2.5s infinite;
+}
+
+.detail-header {
+  border-bottom: 2px solid var(--green-light);
+  padding-bottom: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.detail-header h3 {
+  font-size: 1.45rem;
+  color: var(--green-primary);
+}
+
+.sci-name {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.detail-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+.tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.tag-healthy { background: #dcfce7; color: #166534; }
+.tag-felling { background: #fee2e2; color: #991b1b; }
+.tag-allergy { background: #fef3c7; color: #92400e; }
+.tag-safe { background: #e0f2fe; color: #075985; }
+
+.detail-item {
+  margin-bottom: 0.85rem;
+  font-size: 0.95rem;
+}
+
+.detail-item strong {
+  color: var(--green-dark);
+}
+
+/* ==========================================================================
+   TOP 10 RANKING
+   ========================================================================== */
+.ranking-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 45px 220px 1fr 85px;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eef5f0;
+}
+
+.rank-row:last-child {
+  border-bottom: none;
+}
+
+.rank-num {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: var(--green-primary);
+  font-size: 1.1rem;
+}
+
+.rank-name {
+  font-weight: 700;
+}
+
+.rank-bar-bg {
+  background: var(--green-light);
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rank-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-primary), var(--green-medium));
+  border-radius: 8px;
+  transition: width 1s ease-out;
+}
+
+.rank-count {
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   TARJETAS DE ESPECIES Y PUNTOS VERDES
+   ========================================================================== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.5rem;
+}
+
+.species-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 1.6rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.species-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.species-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+}
+
+.species-card p {
+  font-size: 0.92rem;
+  margin-bottom: 0.65rem;
+}
+
+.spots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.4rem;
+}
+
+.spot-card {
+  background: var(--bg-card);
+  border-left: 5px solid var(--green-medium);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.spot-type {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--green-medium);
+  letter-spacing: 0.6px;
+}
+
+/* ==========================================================================
+   ALERGIAS Y TABLA DE TALAS
+   ========================================================================== */
+.allergy-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.allergy-species-box, .allergy-tips-box {
+  background: var(--bg-card);
+  padding: 1.8rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.allergenic-item {
+  background: #fffbeb;
+  border-left: 4px solid var(--warning-amber);
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  margin-top: 0.9rem;
+}
+
+.tips-list {
+  margin-top: 1rem;
+  padding-left: 1.2rem;
+}
+
+.tips-list li {
+  margin-bottom: 0.75rem;
+  font-size: 0.96rem;
+}
+
+.medical-disclaimer {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.felling-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.felling-table th {
+  background: var(--green-dark);
+  color: #fff;
+  padding: 1rem 1.2rem;
+  font-size: 0.92rem;
+}
+
+.felling-table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   FOOTER Y RESPONSIVE
+   ========================================================================== */
+.footer {
+  background: var(--green-dark);
+  color: #dcf2e5;
+  padding: 3rem 5%;
+  margin-top: 5rem;
+}
+
+.footer-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer h3, .footer h4 {
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+
+.course-tag {
+  display: inline-block;
+  margin-top: 0.4rem;
+  background: rgba(255,255,255,0.12);
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #8ce0b0;
+}
+
+@media (max-width: 900px) {
+  .map-layout, .allergy-layout {
+    grid-template-columns: 1fr;
+  }
+  .nav-links {
+    display: none;
+  }
+  .rank-row {
+    grid-template-columns: 35px 150px 1fr 65px;
+  }
+}
