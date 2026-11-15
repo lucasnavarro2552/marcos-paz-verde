@@ -117,20 +117,23 @@ function initMap() {
     // Coordenadas centrales de Marcos Paz, Buenos Aires
     map = L.map('map').setView([-34.7665, -58.8332], 15);
 
-    // Capa base gratuita de OpenStreetMap (sin API Key)
+    // Capa base de Esri (ArcGIS)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
-    maxZoom: 19
-}).addTo(map);
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
+        maxZoom: 19
+    }).addTo(map);
+
+    // IMPORTANTE: Asegúrate de que esta línea esté aquí dentro
+    markersLayer = L.layerGroup().addTo(map);
 }
 
 /**
- * Renderiza los marcadores uno por uno con retraso escalonado para simular
- * que los árboles se van "plantando" en el mapa.
+ * Renderiza los marcadores uno por uno con retraso escalonado
  */
 function renderMapMarkers(filter) {
-  markersLayer.clearLayers();
-  let delayIndex = 0;
+    if (!markersLayer) return; // Validación de seguridad por si acaso
+    markersLayer.clearLayers();
+    let delayIndex = 0;
 
   // 1. Marcadores de árboles
   if (filter !== 'greenspots') {
