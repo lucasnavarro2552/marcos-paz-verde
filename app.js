@@ -108,6 +108,7 @@ async function loadCensusData() {
   renderGreenSpots();
   renderAllergySection();
   renderFellingTable();
+  updateClimateChart('rainfall');
 }
 
 // ============================================================================
@@ -359,4 +360,54 @@ function initScrollAnimations() {
   }, { threshold: 0.12 });
 
   document.querySelectorAll('.reveal').forEach(section => observer.observe(section));
+// ============================================================================
+// 7. GRÁFICO INTERACTIVO DE LLUVIAS Y TEMPERATURAS POR AÑO (MARCOS PAZ)
+// ============================================================================
+const CLIMATE_HISTORY = [
+  { year: '2018', rainfall: 1480, temp: 36.5, note: 'Wettest year (Flooding)' },
+  { year: '2019', rainfall: 1090, temp: 35.8, note: 'Normal rainfall' },
+  { year: '2020', rainfall: 820,  temp: 37.2, note: 'La Niña onset' },
+  { year: '2021', rainfall: 760,  temp: 38.0, note: 'Below average' },
+  { year: '2022', rainfall: 540,  temp: 39.4, note: 'Severe drought' },
+  { year: '2023', rainfall: 610,  temp: 40.8, note: 'Hottest + Tree mortality' },
+  { year: '2024', rainfall: 1120, temp: 40.2, note: 'Heavy storms' },
+  { year: '2025', rainfall: 1040, temp: 37.6, note: 'Recovery phase' },
+  { year: '2026', rainfall: 990,  temp: 36.9, note: 'Current year (est.)' }
+];
+
+function updateClimateChart(metric) {
+  const container = document.getElementById('climate-bars-container');
+  if (!container) return;
+
+  // Actualizar estado activo de los botones del gráfico
+  const buttons = document.querySelectorAll('.chart-toggles .filter-btn');
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(metric));
+  });
+
+  const isRain = metric === 'rainfall';
+  const maxVal = isRain ? 1600 : 45;
+
+  container.innerHTML = CLIMATE_HISTORY.map(item => {
+    const val = isRain ? item.rainfall : item.temp;
+    const heightPct = Math.round((val / maxVal) * 100);
+    
+    // Color dinámico según extremo climático
+    let barColor = '#2e8555';
+    if (isRain) {
+      barColor = val >= 1400 ? '#0284c7' : (val <= 650 ? '#d97706' : '#2e8555');
+    } else {
+      barColor = val >= 40 ? '#dc2626' : (val >= 38 ? '#d97706' : '#2e8555');
+    }
+
+    return `
+      <div class="bar-col" title="${item.year}: ${item.note}">
+        <span class="bar-value">${val}${isRain ? 'mm' : '°C'}</span>
+        <div class="bar-fill" style="height: ${heightPct}%; background: ${barColor};"></div>
+        <span class="bar-year">${item.year}</span>
+      </div>
+    `;
+  }).join('');
+}
+  
 }
