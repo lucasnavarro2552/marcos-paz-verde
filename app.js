@@ -392,23 +392,23 @@ function updateClimateChart(metric) {
   const isRain = metric === 'rainfall';
   const maxVal = isRain ? 1600 : 45;
 
-  container.innerHTML = (appData.climate || CLIMATE_HISTORY).map(...)
+  container.innerHTML = (appData.climate || CLIMATE_HISTORY).map(item => {
     const val = isRain ? item.rainfall : item.temp;
     const heightPct = Math.round((val / maxVal) * 100);
-    
+
     let barColor = '#2e8555';
     if (isRain) {
-      barColor = val >= 1400 ? '#0284c7' : (val <= 650 ? '#d97706' : '#2e8555');
+        barColor = val >= 1400 ? '#0284c7' : (val <= 650 ? '#d97706' : '#2e8555');
     } else {
-      barColor = val >= 40 ? '#dc2626' : (val >= 38 ? '#d97706' : '#2e8555');
+        barColor = val >= 40 ? '#dc2626' : (val >= 38 ? '#d97706' : '#2e8555');
     }
 
     return `
-      <div class="bar-col" title="${item.year}: ${item.note}">
-        <span class="bar-value">${val}${isRain ? 'mm' : '°C'}</span>
-        <div class="bar-fill" style="height: ${heightPct}%; background: ${barColor};"></div>
-        <span class="bar-year">${item.year}</span>
-      </div>
+        <div class="bar-col" title="${item.year}: ${item.note}">
+            <span class="bar-value">${val}${isRain ? 'mm' : '°C'}</span>
+            <div class="bar-fill" style="height: ${heightPct}%; background: ${barColor};"></div>
+            <span class="bar-year">${item.year}</span>
+        </div>
     `;
-  }).join('');
+}).join('');
 }
