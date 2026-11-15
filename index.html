@@ -232,6 +232,64 @@
           <p><strong>Prevention:</strong> Scheduled winter crown thinning and replacing high-risk specimens prevent power line damage and street blockages.</p>
         </article>
       </div>
+      </div> <!-- 👈 Fin de .cards-grid que ya agregaste antes -->
+
+      <!-- 👇 AGREGAR DESDE AQUÍ (Alrededor de la línea 231, justo antes de </section>) -->
+      <div class="climate-dashboard">
+        <!-- Gráfico interactivo de Lluvias y Temperatura -->
+        <div class="climate-chart-box">
+          <div class="chart-header">
+            <div>
+              <h3>📊 Annual Rainfall & Extreme Temperature Record (Marcos Paz)</h3>
+              <span class="sci-name">Historical meteorological trends affecting urban forest survival (2018–2026)</span>
+            </div>
+            <div class="chart-toggles">
+              <button class="filter-btn active" onclick="updateClimateChart('rainfall')">Annual Rainfall (mm)</button>
+              <button class="filter-btn" onclick="updateClimateChart('temp')">Peak Summer Temp (°C)</button>
+            </div>
+          </div>
+          <div id="climate-bars-container" class="climate-bars">
+            <!-- Barras generadas dinámicamente por JS -->
+          </div>
+        </div>
+
+        <!-- Registro de años extremos y última gran mortandad -->
+        <div class="climate-records-col">
+          <div class="record-highlight-grid">
+            <div class="mini-record rainy">
+              <span class="record-badge">🌧️ Wettest Years</span>
+              <strong>2014 & 2018 (1,480 mm)</strong>
+              <p>Severe soil waterlogging; root asphyxiation in non-native street trees.</p>
+            </div>
+            <div class="mini-record hot">
+              <span class="record-badge">🔥 Hottest Years</span>
+              <strong>2023 & 2024 (40.8°C peak)</strong>
+              <p>Prolonged heatwaves scorched young saplings and shallow-rooted Lindens.</p>
+            </div>
+            <div class="mini-record drought">
+              <span class="record-badge">🏜️ Worst Drought</span>
+              <strong>2022–2023 La Niña (540 mm)</strong>
+              <p>Three consecutive dry summers depleted groundwater tables across Buenos Aires.</p>
+            </div>
+          </div>
+
+          <div class="mortality-alert-box">
+            <div class="species-card-top">
+              <div>
+                <h4>⚠️ Last Major Tree Mortality Event: 2023–2024</h4>
+                <span class="sci-name">Compound Effect: Historic Drought + Severe Windstorms</span>
+              </div>
+              <span class="tag tag-felling">~380 Trees Lost</span>
+            </div>
+            <p>
+              <strong>Cause:</strong> Following the extreme <strong>2022–2023 La Niña drought</strong> that weakened root systems and triggered wood-boring beetle infestations in <em>Red Ash</em> and <em>Eucalyptus</em>, the severe convective storms of <strong>December 2023 and March 2024</strong> (gusts over 110 km/h) uprooted hundreds of weakened specimens across Marcos Paz.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- 👆 HASTA AQUÍ -->
+
+    </section> <!-- 👈 Cierre de #climate-section -->
     </section>
 
   </main> <!-- 👈 PEGAR JUSTO ARRIBA DE ESTA ETIQUETA (Línea 183 aprox.) -->
