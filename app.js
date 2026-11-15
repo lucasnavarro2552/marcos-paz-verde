@@ -7,8 +7,8 @@
 // 1. CONFIGURACIÓN DE SUPABASE
 // Reemplazá estos valores con la URL y la Anon Key de tu proyecto en Supabase.
 // Si los dejás así, la aplicación usará automáticamente los datos de respaldo locales.
-const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU-ANON-KEY-PUBLICA';
+const SUPABASE_URL = 'https://kzgvsjkvgdufwnuriszv.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Z3Zzamt2Z2R1ZndudXJpc3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NzQ1MTgsImV4cCI6MjExMDM1MDUxOH0.HGaoGMkUYKZLGOk4DAj6FYPBEKgm02AapOlCTWFfr0Y';
 
 let supabaseClient = null;
 if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('TU-PROYECTO')) {
