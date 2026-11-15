@@ -67,16 +67,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 /**
  * Carga datos desde Supabase; si falla o no está configurado, usa los datos locales.
  */
+// Reemplazar la función loadCensusData() en app.js (alrededor de la línea 58)
 async function loadCensusData() {
   const statusBadge = document.getElementById('db-status');
 
   try {
     if (!supabaseClient) throw new Error('Supabase credentials not configured');
 
-    const [speciesRes, treesRes, spotsRes] = await Promise.all([
+    const [speciesRes, treesRes, spotsRes, climateRes] = await Promise.all([
       supabaseClient.from('species').select('*').order('tree_count', { ascending: false }),
       supabaseClient.from('trees').select('*'),
-      supabaseClient.from('green_spots').select('*')
+      supabaseClient.from('green_spots').select('*'),
+      supabaseClient.from('climate_history').select('*').order('year', { ascending: true })
     ]);
 
     if (speciesRes.error || treesRes.error || spotsRes.error) {
@@ -86,6 +88,16 @@ async function loadCensusData() {
     appData.species = speciesRes.data;
     appData.trees = treesRes.data;
     appData.greenSpots = spotsRes.data;
+    if (climateRes.data && climateRes.data.length > 0) {
+      appData.climate = climateRes.data.map(row => ({
+        year: row.year,
+        rainfall: row.rainfall_mm,
+        temp: row.peak_temp_c,
+        note: row.note
+      }));
+    } else {
+      appData.climate = CLIMATE_HISTORY;
+    }
 
     statusBadge.textContent = '● Live: Supabase DB';
     statusBadge.style.color = '#8ce0b0';
@@ -94,6 +106,7 @@ async function loadCensusData() {
     appData.species = FALLBACK_SPECIES;
     appData.trees = FALLBACK_TREES;
     appData.greenSpots = FALLBACK_GREEN_SPOTS;
+    appData.climate = CLIMATE_HISTORY;
 
     statusBadge.textContent = '● Local Demo Mode';
     statusBadge.style.color = '#fde68a';
@@ -379,7 +392,7 @@ function updateClimateChart(metric) {
   const isRain = metric === 'rainfall';
   const maxVal = isRain ? 1600 : 45;
 
-  container.innerHTML = CLIMATE_HISTORY.map(item => {
+  container.innerHTML = (appData.climate || CLIMATE_HISTORY).map(...)
     const val = isRain ? item.rainfall : item.temp;
     const heightPct = Math.round((val / maxVal) * 100);
     
