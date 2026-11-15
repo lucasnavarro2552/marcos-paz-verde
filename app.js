@@ -4,10 +4,8 @@
  * ============================================================================
  */
 
-// 1. CONFIGURACIÓN DE SUPABASE
-// Reemplazá estos valores con la URL y la Anon Key de tu proyecto en Supabase.
-// Si los dejás así, la aplicación usará automáticamente los datos de respaldo locales.
-const SUPABASE_URL = 'https://kzgvsjkvgdufwnuriszv.supabase.co/rest/v1/';
+// 1. CONFIGURACIÓN DE SUPABASE (URL base limpia sin /rest/v1/)
+const SUPABASE_URL = 'https://kzgvsjkvgdufwnuriszv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Z3Zzamt2Z2R1ZndudXJpc3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NzQ1MTgsImV4cCI6MjExMDM1MDUxOH0.HGaoGMkUYKZLGOk4DAj6FYPBEKgm02AapOlCTWFfr0Y';
 
 let supabaseClient = null;
@@ -16,7 +14,6 @@ if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('TU-PROYECTO')
 }
 
 // 2. DATOS DE RESPALDO (FALLBACK DATA)
-// Garantiza que la presentación en el proyector funcione al 100% incluso sin internet.
 const FALLBACK_SPECIES = [
   { id: 1, common_name: 'London Plane', scientific_name: 'Platanus × acerifolia', tree_count: 1420, care: 'Requires annual winter pruning to control canopy size and reduce seed fluff.', benefits: 'Exceptional shade coverage, high tolerance to urban pollution and compacted soil.', cons: 'Seed hairs cause severe respiratory and eye irritation in spring; aggressive roots lift sidewalks.', is_allergenic: true, allergy_notes: 'High allergenicity in Sept–Oct due to airborne trichomes.', history: 'Planted extensively across Buenos Aires Province avenues in the early 20th century for rapid shade.' },
   { id: 2, common_name: 'Red Ash', scientific_name: 'Fraxinus pennsylvanica', tree_count: 1180, care: 'Moderate watering during first 3 years; prune dead branches in late winter.', benefits: 'Fast-growing, golden autumn foliage, resistant to local frosts.', cons: 'Susceptible to wood-boring insects if stressed; moderate pollen allergen.', is_allergenic: true, allergy_notes: 'Moderate pollen allergy risk in early spring.', history: 'Introduced from North America and widely adopted in Marcos Paz residential streets.' },
@@ -64,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initMap();                  // Inicializa el mapa centrado en Marcos Paz
   await loadCensusData();     // Carga datos desde Supabase o Fallback
   setupFilterButtons();       // Activa filtros del mapa
+  updateClimateChart('rainfall'); // Inicializa el gráfico climático
 });
 
 /**
@@ -115,26 +113,23 @@ async function loadCensusData() {
 // 4. MAPA INTERACTIVO Y ANIMACIÓN DE "PLANTADO" DE MARCADORES
 // ============================================================================
 function initMap() {
-    // Coordenadas centrales de Marcos Paz, Buenos Aires
-    map = L.map('map').setView([-34.7665, -58.8332], 15);
+  map = L.map('map').setView([-34.7665, -58.8332], 15);
 
-    // Capa base de Esri (ArcGIS)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
-        maxZoom: 19
-    }).addTo(map);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19
+  }).addTo(map);
 
-    // IMPORTANTE: Asegúrate de que esta línea esté aquí dentro
-    markersLayer = L.layerGroup().addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
 }
 
 /**
  * Renderiza los marcadores uno por uno con retraso escalonado
  */
 function renderMapMarkers(filter) {
-    if (!markersLayer) return; // Validación de seguridad por si acaso
-    markersLayer.clearLayers();
-    let delayIndex = 0;
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+  let delayIndex = 0;
 
   // 1. Marcadores de árboles
   if (filter !== 'greenspots') {
@@ -142,7 +137,6 @@ function renderMapMarkers(filter) {
       const sp = appData.species.find(s => s.id === tree.species_id);
       if (!sp) return;
 
-      // Aplicar filtro seleccionado
       if (filter === 'healthy' && tree.status !== 'Healthy') return;
       if (filter === 'felling' && tree.status !== 'Scheduled for Felling') return;
       if (filter === 'allergenic' && !sp.is_allergenic) return;
@@ -159,7 +153,7 @@ function renderMapMarkers(filter) {
 
         const marker = L.marker([tree.lat, tree.lng], { icon: customIcon }).addTo(markersLayer);
         marker.on('click', () => showTreeDetails(tree, sp));
-      }, delayIndex * 110); // 110ms entre cada árbol "plantado"
+      }, delayIndex * 110);
 
       delayIndex++;
     });
@@ -185,9 +179,6 @@ function renderMapMarkers(filter) {
   }
 }
 
-/**
- * Muestra la ficha completa del árbol seleccionado en el panel lateral del mapa
- */
 function showTreeDetails(tree, species) {
   const panel = document.getElementById('tree-detail-panel');
   const statusClass = tree.status === 'Healthy' ? 'tag-healthy' : 'tag-felling';
@@ -231,7 +222,7 @@ function showGreenSpotDetails(spot) {
 }
 
 function setupFilterButtons() {
-  const buttons = document.querySelectorAll('.filter-btn');
+  const buttons = document.querySelectorAll('.map-controls .filter-btn');
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       buttons.forEach(b => b.classList.remove('active'));
@@ -249,7 +240,6 @@ function renderTop10Ranking() {
   const sorted = [...appData.species].sort((a, b) => b.tree_count - a.tree_count).slice(0, 10);
   const maxCount = sorted[0]?.tree_count || 1;
 
-  // Actualizar contador total del encabezado
   const totalTrees = sorted.reduce((acc, item) => acc + item.tree_count, 0);
   document.getElementById('total-trees-stat').textContent = totalTrees.toLocaleString();
 
@@ -336,7 +326,7 @@ function renderFellingTable() {
 function createFallingLeaves() {
   const container = document.getElementById('leaves-container');
   const leafEmojis = ['🍃', '🌿', '🍂'];
-  const leafCount = 14; // Cantidad sutil para no distraer en el proyector
+  const leafCount = 14;
 
   for (let i = 0; i < leafCount; i++) {
     const leaf = document.createElement('span');
@@ -360,6 +350,8 @@ function initScrollAnimations() {
   }, { threshold: 0.12 });
 
   document.querySelectorAll('.reveal').forEach(section => observer.observe(section));
+} // 👈 AQUÍ CERRABA LA LLAVE CORRECTAMENTE
+
 // ============================================================================
 // 7. GRÁFICO INTERACTIVO DE LLUVIAS Y TEMPERATURAS POR AÑO (MARCOS PAZ)
 // ============================================================================
@@ -379,7 +371,6 @@ function updateClimateChart(metric) {
   const container = document.getElementById('climate-bars-container');
   if (!container) return;
 
-  // Actualizar estado activo de los botones del gráfico
   const buttons = document.querySelectorAll('.chart-toggles .filter-btn');
   buttons.forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('onclick').includes(metric));
@@ -392,7 +383,6 @@ function updateClimateChart(metric) {
     const val = isRain ? item.rainfall : item.temp;
     const heightPct = Math.round((val / maxVal) * 100);
     
-    // Color dinámico según extremo climático
     let barColor = '#2e8555';
     if (isRain) {
       barColor = val >= 1400 ? '#0284c7' : (val <= 650 ? '#d97706' : '#2e8555');
@@ -408,6 +398,4 @@ function updateClimateChart(metric) {
       </div>
     `;
   }).join('');
-}
-  
 }
