@@ -122,6 +122,7 @@ function initMap() {
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom',
     maxZoom: 19
 }).addTo(map);
+}
 
 /**
  * Renderiza los marcadores uno por uno con retraso escalonado para simular
