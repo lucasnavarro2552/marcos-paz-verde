@@ -4,14 +4,29 @@
  * ============================================================================
  */
 
-// 1. CONFIGURACIÓN DE SUPABASE (URL base limpia sin /rest/v1/)
-const SUPABASE_URL = 'https://kzgvsjkvgdufwnuriszv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Z3Zzamt2Z2R1ZndudXJpc3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NzQ1MTgsImV4cCI6MjExMDM1MDUxOH0.HGaoGMkUYKZLGOk4DAj6FYPBEKgm02AapOlCTWFfr0Y';
+// 1. CONFIGURACIÓN DE LOS DOS PROYECTOS DE SUPABASE
+const DB_CONFIGS = {
+  demo: {
+    label: 'Demo DB (Marcos Paz)',
+    url: 'https://kzgvsjkvgdufwnuriszv.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Z3Zzamt2Z2R1ZndudXJpc3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NzQ1MTgsImV4cCI6MjExMDM1MDUxOH0.HGaoGMkUYKZLGOk4DAj6FYPBEKgm02AapOlCTWFfr0Y',
+    center: [-34.7665, -58.8332],
+    zoom: 15
+  },
+  real: {
+    label: 'Real DB (CABA)',
+    url: 'https://dsluxfsiommyfickeujs.supabase.co', // 👈 Pegá acá la URL de tu proyecto real
+    key: 'sb_publishable_1jsjN9pe_3Hfawm4XGTxlQ_UfSXki0V',                      // 👈 Pegá acá la ANON KEY de tu proyecto real
+    center: [-34.6037, -58.3816],
+    zoom: 14
+  }
+};
 
-let supabaseClient = null;
-if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('TU-PROYECTO')) {
-  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
+let activeDbMode = 'demo'; // Arranca en el proyecto de prueba
+let supabaseClient = window.supabase.createClient(
+  DB_CONFIGS[activeDbMode].url,
+  DB_CONFIGS[activeDbMode].key
+);
 
 // 2. DATOS DE RESPALDO (FALLBACK DATA)
 const FALLBACK_SPECIES = [
@@ -56,48 +71,63 @@ let markersLayer = null;
 // 3. INICIALIZACIÓN DE LA APLICACIÓN
 // ============================================================================
 document.addEventListener('DOMContentLoaded', async () => {
-  createFallingLeaves();      // Inicia hojas cayendo suavemente
-  initScrollAnimations();     // Configura apariciones al hacer scroll
-  initMap();                  // Inicializa el mapa centrado en Marcos Paz
-  await loadCensusData();     // Carga datos desde Supabase o Fallback
-  setupFilterButtons();       // Activa filtros del mapa
-  updateClimateChart('rainfall'); // Inicializa el gráfico climático
+  createFallingLeaves();
+  initScrollAnimations();
+  initMap();
+  await loadCensusData();
+  setupFilterButtons();
+  setupDbToggleButton(); // 👈 Nueva función para el botón
+  updateClimateChart('rainfall');
 });
 
-/**
- * Carga datos desde Supabase; si falla o no está configurado, usa los datos locales.
- */
-// Reemplazar la función loadCensusData() en app.js (alrededor de la línea 58)
+function setupDbToggleButton() {
+  const toggleBtn = document.getElementById('toggle-db-btn');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', async () => {
+    // Alternar entre 'demo' y 'real'
+    activeDbMode = activeDbMode === 'demo' ? 'real' : 'demo';
+    const cfg = DB_CONFIGS[activeDbMode];
+
+    // Crear el nuevo cliente de Supabase y centrar el mapa en la ciudad correspondiente
+    supabaseClient = window.supabase.createClient(cfg.url, cfg.key);
+    if (map) map.setView(cfg.center, cfg.zoom);
+
+    // Actualizar texto del botón y estado
+    toggleBtn.textContent = activeDbMode === 'demo'
+      ? '🔄 Switch to Real DB'
+      : '🔄 Switch to Demo DB';
+
+    document.getElementById('db-status').textContent = 'Connecting...';
+    await loadCensusData();
+  });
+}
+
+let currentMapFilter = 'all';
+
 async function loadCensusData() {
   const statusBadge = document.getElementById('db-status');
 
   try {
     if (!supabaseClient) throw new Error('Supabase credentials not configured');
 
-    const [speciesRes, treesRes, spotsRes, climateRes] = await Promise.all([
+    const [speciesRes, spotsRes, climateRes] = await Promise.all([
       supabaseClient.from('species').select('*').order('tree_count', { ascending: false }),
-      supabaseClient.from('trees').select('*'),
       supabaseClient.from('green_spots').select('*'),
       supabaseClient.from('climate_history').select('*').order('year', { ascending: true })
     ]);
 
-    if (speciesRes.error || treesRes.error || spotsRes.error) {
-      throw new Error('Supabase query error');
-    }
+    if (speciesRes.error) throw new Error(speciesRes.error.message);
 
     appData.species = speciesRes.data;
-    appData.trees = treesRes.data;
-    appData.greenSpots = spotsRes.data;
-    if (climateRes.data && climateRes.data.length > 0) {
-      appData.climate = climateRes.data.map(row => ({
-        year: row.year,
-        rainfall: row.rainfall_mm,
-        temp: row.peak_temp_c,
-        note: row.note
-      }));
-    } else {
-      appData.climate = CLIMATE_HISTORY;
-    }
+    appData.greenSpots = (!spotsRes.error && spotsRes.data?.length) ? spotsRes.data : FALLBACK_GREEN_SPOTS;
+    appData.climate = (!climateRes.error && climateRes.data?.length)
+      ? climateRes.data.map(row => ({ year: row.year, rainfall: row.rainfall_mm, temp: row.peak_temp_c, note: row.note }))
+      : CLIMATE_HISTORY;
+
+    // Centrar el mapa en CABA (Obelisco / Centro) y cargar árboles visibles
+    map.setView([-34.6037, -58.3816], 15);
+    await loadTreesInBounds();
 
     statusBadge.textContent = '● Live: Supabase DB';
     statusBadge.style.color = '#8ce0b0';
@@ -108,12 +138,11 @@ async function loadCensusData() {
     appData.greenSpots = FALLBACK_GREEN_SPOTS;
     appData.climate = CLIMATE_HISTORY;
 
+    renderMapMarkers('all');
     statusBadge.textContent = '● Local Demo Mode';
     statusBadge.style.color = '#fde68a';
   }
 
-  // Renderizar todas las secciones con los datos obtenidos
-  renderMapMarkers('all');
   renderTop10Ranking();
   renderSpeciesCards();
   renderGreenSpots();
@@ -122,11 +151,8 @@ async function loadCensusData() {
   updateClimateChart('rainfall');
 }
 
-// ============================================================================
-// 4. MAPA INTERACTIVO Y ANIMACIÓN DE "PLANTADO" DE MARCADORES
-// ============================================================================
 function initMap() {
-  map = L.map('map').setView([-34.7665, -58.8332], 15);
+  map = L.map('map').setView([-34.6037, -58.3816], 15);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'Tiles &copy; Esri',
@@ -134,15 +160,48 @@ function initMap() {
   }).addTo(map);
 
   markersLayer = L.layerGroup().addTo(map);
+
+  // Recargar automáticamente los árboles de la zona cada vez que el usuario mueve o hace zoom en el mapa
+  let moveTimer = null;
+  map.on('moveend', () => {
+    clearTimeout(moveTimer);
+    moveTimer = setTimeout(() => {
+      if (supabaseClient) loadTreesInBounds();
+    }, 250);
+  });
 }
 
-/**
- * Renderiza los marcadores uno por uno con retraso escalonado
- */
+async function loadTreesInBounds() {
+  if (!map || !supabaseClient) return;
+
+  const bounds = map.getBounds();
+  const south = bounds.getSouth();
+  const north = bounds.getNorth();
+  const west = bounds.getWest();
+  const east = bounds.getEast();
+
+  // Trae hasta 1000 árboles dentro de la pantalla visible actual
+  const { data, error } = await supabaseClient
+    .from('trees')
+    .select('*')
+    .gte('lat', south)
+    .lte('lat', north)
+    .gte('lng', west)
+    .lte('lng', east)
+    .limit(1000);
+
+  if (!error && data) {
+    appData.trees = data;
+    renderMapMarkers(currentMapFilter);
+  }
+}
+
 function renderMapMarkers(filter) {
+  currentMapFilter = filter;
   if (!markersLayer) return;
   markersLayer.clearLayers();
-  let delayIndex = 0;
+
+  const zoom = map ? map.getZoom() : 15;
 
   // 1. Marcadores de árboles
   if (filter !== 'greenspots') {
@@ -150,70 +209,85 @@ function renderMapMarkers(filter) {
       const sp = appData.species.find(s => s.id === tree.species_id);
       if (!sp) return;
 
-      if (filter === 'healthy' && tree.status !== 'Healthy') return;
-      if (filter === 'felling' && tree.status !== 'Scheduled for Felling') return;
+      const status = tree.status || 'Healthy';
+      if (filter === 'healthy' && status !== 'Healthy') return;
+      if (filter === 'felling' && status !== 'Scheduled for Felling') return;
       if (filter === 'allergenic' && !sp.is_allergenic) return;
 
-      const emoji = tree.status === 'Scheduled for Felling' ? '🪓' : (sp.id === 3 || sp.id === 7 ? '🌸' : '🌳');
+      const lat = parseFloat(tree.lat);
+      const lng = parseFloat(tree.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
 
-      setTimeout(() => {
+      let marker;
+      // Si hay zoom cercano (>= 16), muestra los íconos de árbol; si está lejos, puntos verdes livianos para no tapar el mapa
+      if (zoom >= 16) {
+        const emoji = status === 'Scheduled for Felling' ? '🪓' : (sp.id === 3 || sp.id === 7 ? '🌸' : '🌳');
         const customIcon = L.divIcon({
           className: 'custom-tree-div',
           html: `<div class="tree-marker-icon">${emoji}</div>`,
           iconSize: [32, 32],
           iconAnchor: [16, 30]
         });
+        marker = L.marker([lat, lng], { icon: customIcon });
+      } else {
+        marker = L.circleMarker([lat, lng], {
+          radius: 5,
+          fillColor: sp.is_allergenic ? '#d97706' : '#2e8555',
+          color: '#143625',
+          weight: 1,
+          fillOpacity: 0.85
+        });
+      }
 
-        const marker = L.marker([tree.lat, tree.lng], { icon: customIcon }).addTo(markersLayer);
-        marker.on('click', () => showTreeDetails(tree, sp));
-      }, delayIndex * 110);
-
-      delayIndex++;
+      marker.addTo(markersLayer);
+      marker.on('click', () => showTreeDetails(tree, sp));
     });
   }
 
   // 2. Marcadores de Puntos Verdes
   if (filter === 'all' || filter === 'greenspots') {
     appData.greenSpots.forEach((spot) => {
-      setTimeout(() => {
-        const spotIcon = L.divIcon({
-          className: 'custom-spot-div',
-          html: `<div class="tree-marker-icon">🏞️</div>`,
-          iconSize: [34, 34],
-          iconAnchor: [17, 30]
-        });
-
-        const marker = L.marker([spot.lat, spot.lng], { icon: spotIcon }).addTo(markersLayer);
-        marker.on('click', () => showGreenSpotDetails(spot));
-      }, delayIndex * 110);
-
-      delayIndex++;
+      const spotIcon = L.divIcon({
+        className: 'custom-spot-div',
+        html: `<div class="tree-marker-icon">🏞️</div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 30]
+      });
+      const marker = L.marker([spot.lat, spot.lng], { icon: spotIcon }).addTo(markersLayer);
+      marker.on('click', () => showGreenSpotDetails(spot));
     });
   }
 }
 
 function showTreeDetails(tree, species) {
   const panel = document.getElementById('tree-detail-panel');
-  const statusClass = tree.status === 'Healthy' ? 'tag-healthy' : 'tag-felling';
+  const status = tree.status || 'Healthy';
+  const statusClass = status === 'Healthy' ? 'tag-healthy' : 'tag-felling';
   const allergyClass = species.is_allergenic ? 'tag-allergy' : 'tag-safe';
   const allergyText = species.is_allergenic ? '⚠️ Allergenic' : '✅ Non-Allergenic';
 
+  const latNum = parseFloat(String(tree.lat).replace(',', '.'));
+  const lngNum = parseFloat(String(tree.lng).replace(',', '.'));
+  const coordsText = (!isNaN(latNum) && !isNaN(lngNum))
+    ? `${latNum.toFixed(4)}, ${lngNum.toFixed(4)}`
+    : `${tree.lat}, ${tree.lng}`;
+
   panel.innerHTML = `
     <div class="detail-header">
-      <h3>${species.common_name}</h3>
-      <span class="sci-name">${species.scientific_name}</span>
+      <h3>${species.common_name || species.scientific_name}</h3>
+      <span class="sci-name">${species.scientific_name || ''}</span>
       <div class="detail-tags">
-        <span class="tag ${statusClass}">${tree.status}</span>
+        <span class="tag ${statusClass}">${status}</span>
         <span class="tag ${allergyClass}">${allergyText}</span>
       </div>
     </div>
-    <div class="detail-item"><strong>🌱 Care:</strong> ${species.care}</div>
-    <div class="detail-item"><strong>✨ Benefits:</strong> ${species.benefits}</div>
-    <div class="detail-item"><strong>⚠️ Cons:</strong> ${species.cons}</div>
-    <div class="detail-item"><strong>🤧 Allergy Info:</strong> ${species.allergy_notes}</div>
-    <div class="detail-item"><strong>📜 History:</strong> ${species.history}</div>
+    <div class="detail-item"><strong>🌱 Care:</strong> ${species.care || 'No data available.'}</div>
+    <div class="detail-item"><strong>✨ Benefits:</strong> ${species.benefits || 'No data available.'}</div>
+    <div class="detail-item"><strong>⚠️ Cons:</strong> ${species.cons || 'No data available.'}</div>
+    <div class="detail-item"><strong>🤧 Allergy Info:</strong> ${species.allergy_notes || 'No data available.'}</div>
+    <div class="detail-item"><strong>📜 History:</strong> ${species.history || 'No data available.'}</div>
     <div class="detail-item" style="margin-top:0.5rem; font-size:0.85rem; color:#4b6356;">
-      <strong>Location:</strong> ${tree.lat.toFixed(4)}, ${tree.lng.toFixed(4)}
+      <strong>Location:</strong> ${coordsText}
       ${tree.felling_date ? `<br><strong style="color:#c93b3b;">Scheduled Felling:</strong> ${tree.felling_date}` : ''}
     </div>
   `;
@@ -273,7 +347,7 @@ function renderTop10Ranking() {
 
 function renderSpeciesCards() {
   const grid = document.getElementById('species-grid');
-  grid.innerHTML = appData.species.map(sp => `
+  grid.innerHTML = appData.species.slice(0, 10).map(sp => `
     <article class="species-card">
       <div class="species-card-top">
         <div>
@@ -305,7 +379,10 @@ function renderGreenSpots() {
 
 function renderAllergySection() {
   const container = document.getElementById('allergenic-list');
-  const allergenic = appData.species.filter(sp => sp.is_allergenic);
+  const allergenic = appData.species
+    .filter(sp => sp.is_allergenic)
+    .sort((a, b) => (b.tree_count || 0) - (a.tree_count || 0))
+    .slice(0, 6);
 
   container.innerHTML = allergenic.map(sp => `
     <div class="allergenic-item">

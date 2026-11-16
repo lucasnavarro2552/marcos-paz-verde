@@ -36,7 +36,12 @@
       <li><a href="#felling-section">Felling Schedule</a></li>
       <li><a href="#climate-section">Climate Impact</a></li>
     </ul>
-    <div id="db-status" class="db-badge" title="Database connection status">Connecting...</div>
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+      <button id="toggle-db-btn" class="filter-btn" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">
+        🔄 Switch to Real DB
+      </button>
+      <div id="db-status" class="db-badge" title="Database connection status">Connecting...</div>
+    </div>
   </nav>
 
   <!-- Encabezado principal (Hero) -->
